@@ -53,17 +53,21 @@
 %     along with CPD package; if not, write to the Free Software
 %     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-function [C, B, t, sigma2, iter, T]=cpd_affine(X,Y, max_it, tol, viz, outliers, fgt, corresp, sigma2)
+function [C, B, t, sigma2, iter, T, history]=cpd_affine(X,Y, max_it, tol, viz, outliers, fgt, corresp, sigma2, savegif, verbosity, saveoptim)
+
+disp('1')
 
 [N, D]=size(X);[M, D]=size(Y);
 
 % Initialize sigma and Y
-if ~exist('sigma2','var') || isempty(sigma2) || (sigma2==0), 
+if ~exist('sigma2','var') || isempty(sigma2) || (sigma2==0)
     sigma2=(M*trace(X'*X)+N*trace(Y'*Y)-2*sum(X)*sum(Y)')/(M*N*D);
 end
 sigma2_init=sigma2;
-
+disp(sigma2_init)
 T=Y;
+
+history = struct('fixed', X); history.moving = cell(max_it,1);
 
 % Optimization
 iter=0; ntol=tol+10; L=1;
@@ -79,20 +83,18 @@ while (iter<max_it) && (ntol > tol) && (sigma2 > 10*eps)
     end
     
     ntol=abs((L-L_old)/L);
-    disp([' CPD Affine ' st ' : dL= ' num2str(ntol) ', iter= ' num2str(iter) ' sigma2= ' num2str(sigma2)]);
+    if verbosity > 0; disp([' CPD Affine ' st ' : dL= ' num2str(ntol) ', iter= ' num2str(iter) ' sigma2= ' num2str(sigma2)]); end
   
     % Precompute 
     Np=sum(P1);
     mu_x=X'*Pt1/Np;
     mu_y=Y'*P1/Np;
 
-
     % Solve for parameters
     B1=PX'*Y-Np*(mu_x*mu_y');
     B2=(Y.*repmat(P1,1,D))'*Y-Np*(mu_y*mu_y');
     B=B1/B2; % B= B1 * inv(B2);
-    
-    
+     
     t=mu_x-B*mu_y;
     
     sigma2save=sigma2;
@@ -105,10 +107,34 @@ while (iter<max_it) && (ntol > tol) && (sigma2 > 10*eps)
 
     iter=iter+1;
 
-    if viz, cpd_plot_iter(X, T); end;
+    if viz, cpd_plot_iter(X, T); end
+    
+    if savegif
+        % Save frame as gif
+        f = getframe(gcf);
+        if iter == 1
+            pos = get(gcf, 'Position');
+            width = pos(3); height = pos(4);
+            mov = zeros(height, width, 1, max_it, 'uint8');
+            [mov(:,:,1,iter), map] = rgb2ind(f.cdata, 256, 'nodither');
+        else
+            mov(:,:,1,iter) = rgb2ind(f.cdata, map, 'nodither');
+        end
+    end
+    
+    % Save history
+    if mod(iter, saveoptim) == 0
+        history.moving{iter} = T;
+    end
+end
+
+if saveoptim; history.moving = history.moving(1:iter); end
+
+if savegif
+    mov = mov(:,:,:,1:iter);
+    % Save to gif
+    imwrite(mov, map, 'animation.gif', 'DelayTime', 0, 'LoopCount', inf);
 end
 
 % Find the correspondence, such that Y(C) corresponds to X
 if corresp, C=cpd_Pcorrespondence(X,T,sigma2save,outliers); else C=0; end;
-
-

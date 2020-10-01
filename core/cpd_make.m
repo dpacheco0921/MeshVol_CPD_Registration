@@ -20,7 +20,7 @@
 
 function cpd_make()
 
-psave=pwd; p = mfilename('fullpath'); [pathstr, name, ext, versn] = fileparts(p);
+psave=pwd; p = mfilename('fullpath'); [pathstr, name, ext] = fileparts(p);
 
 %%%%%%%%%%%%%%%%%%%% cpd_P %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,6 +53,5 @@ try
 catch
    disp('Compilation of FGT mex functions failed. Try to run mex -setup to adjust your compiler.');
 end
-
 
 cd(psave);

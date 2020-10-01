@@ -61,7 +61,6 @@
 %     along with CPD package; if not, write to the Free Software
 %     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 function  [C, W, sigma2, iter, T] =cpd_GRBF_lowrank(X, Y, beta, lambda, max_it, tol, viz, outliers, fgt, numeig, eigfgt, corresp, sigma2);
 
 [N, D]=size(X); [M, D]=size(Y);
@@ -75,7 +74,6 @@ sigma2_init=sigma2;
 % Find 'numeig' eigenvectors of the affinity matrix G
 [Q,S]=cpd_GRBF_lowrankQS(Y, beta, numeig, eigfgt);
 invS=spdiags(1./diag(S),0,numeig,numeig);
-
 
 iter=0; ntol=tol+10; L=1;
 while (iter<max_it) && (ntol > tol) && (sigma2 > 1e-8)
@@ -120,4 +118,3 @@ disp('CPD registration succesfully completed.');
 
 %Find the correspondence, such that Y corresponds to X(C,:)
 if corresp, C=cpd_Pcorrespondence(X,T,sigma2save,outliers); else C=0; end;
-

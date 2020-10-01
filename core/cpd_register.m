@@ -78,7 +78,7 @@
 %     along with CPD package; if not, write to the Free Software
 %     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-function [Transform, C]=cpd_register(X, Y, opt)
+function [Transform, C, history]=cpd_register(X, Y, opt)
 
 
 [M,D]=size(Y); [N, D2]=size(X);
@@ -94,6 +94,11 @@ if ~isfield(opt,'corresp') || isempty(opt.corresp), opt.corresp = 0; end;
 if ~isfield(opt,'outliers') || isempty(opt.outliers), opt.outliers = 0.1; end;
 if ~isfield(opt,'fgt') || isempty(opt.fgt), opt.fgt = 0; end;
 if ~isfield(opt,'sigma2') || isempty(opt.sigma2), opt.sigma2 = 0; end;
+
+if ~isfield(opt,'savegif') || isempty(opt.savegif), opt.savegif = false; end;
+if ~isfield(opt,'verbosity') || isempty(opt.verbosity), opt.verbosity = 1; end;
+if ~isfield(opt,'saveoptim') || isempty(opt.saveoptim), opt.saveoptim = 0; end;
+if ~isfield(opt,'vizfn') || isempty(opt.vizfn), opt.vizfn = []; end
 
 % strictly rigid params
 if ~isfield(opt,'rot') || isempty(opt.rot), opt.rot = 1; end;
@@ -132,26 +137,27 @@ normal.xscale=1; normal.yscale=1;
 % Normalize to zero mean and unit variance
 if opt.normalize, [X,Y,normal]=cpd_normalize(X,Y); end;
 
-disp(['%%%%% Starting CPD-' upper(opt.method) ' registration. %%%' ]); tic;
+if opt.verbosity > 0; disp(['%%%%% Starting CPD-' upper(opt.method) ' registration. %%%' ]); end; tic;
 
 %%%% Choose the method and start CPD point-set registration
-switch lower(opt.method),
+switch lower(opt.method)
     case 'rigid'
-        [C, R, t, s, sigma2, iter, T]=cpd_rigid(X,Y, opt.rot, opt.scale, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2);
+        [C, R, t, s, sigma2, iter, T, history]=cpd_rigid(X,Y, opt.rot, opt.scale, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2, opt.savegif, opt.verbosity, opt.saveoptim);
        case 'affine'
-        [C, R, t, sigma2, iter, T]=cpd_affine(X,Y, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2); s=1;
+        [C, R, t, sigma2, iter, T, history]=cpd_affine(X,Y, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2, opt.savegif, opt.verbosity, opt.saveoptim); s=1;
     case 'nonrigid'
-        [C, W, sigma2, iter, T] =cpd_GRBF(X, Y, opt.beta, opt.lambda, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2);    
+        [C, W, sigma2, iter, T, history] =cpd_GRBF(X, Y, opt.beta, opt.lambda, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.corresp, opt.sigma2, opt.savegif, opt.verbosity, opt.saveoptim);
     case 'nonrigid_lowrank'
-        [C, W, sigma2, iter, T] =cpd_GRBF_lowrank(X, Y, opt.beta, opt.lambda, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.numeig, opt.eigfgt, opt.corresp, opt.sigma2);
+        [C, W, sigma2, iter, T, history] =cpd_GRBF_lowrank(X, Y, opt.beta, opt.lambda, opt.max_it, opt.tol, opt.viz, opt.outliers, opt.fgt, opt.numeig, opt.eigfgt, opt.corresp, opt.sigma2, opt.savegif, opt.verbosity, opt.saveoptim, opt.vizfn);
     otherwise
         error('The opt.method value is invalid. Supported methods are: rigid, affine, nonrigid, nonrigid_lowrank');
 end
 %%%% 
-disptime(toc);
+if opt.verbosity > 0; disptime(toc); end
 
 Transform.iter=iter;
 Transform.method=opt.method;
+Transform.sigma2 = sigma2;
 Transform.Y=T;
 Transform.normal=normal;
 
@@ -159,29 +165,25 @@ Transform.normal=normal;
 switch lower(opt.method)
     case {'rigid','affine'}
         Transform.R=R; Transform.t=t;Transform.s=s;
-        if opt.normalize, % denormalize parameters and registered point set, if it was prenormalized
+        if opt.normalize % denormalize parameters and registered point set, if it was prenormalized
             Transform.s=Transform.s*(normal.xscale/normal.yscale);
             Transform.t=normal.xscale*Transform.t+normal.xd'-Transform.s*(Transform.R*normal.yd');
             Transform.Y=T*normal.xscale+repmat(normal.xd,M,1);
             
-            if strcmp(lower(opt.method),'affine')
+            if strcmpi(opt.method,'affine')
                 Transform.R=Transform.s*Transform.R; 
                 Transform.s=1;
             end
             
-        end;
+        end
     case {'nonrigid','nonrigid_lowrank'}
             Transform.beta=opt.beta;
             Transform.W=W;
             Transform.Yorig=Yorig;
             Transform.s=1;
             Transform.t=zeros(D,1);
-        if opt.normalize,
+        if opt.normalize
              Transform.Y=T*normal.xscale+repmat(normal.xd,M,1);
         end 
 
 end
-
-
-
-

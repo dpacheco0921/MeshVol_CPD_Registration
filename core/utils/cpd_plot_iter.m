@@ -34,6 +34,7 @@ if d<2, error('cpd_plot.m error! Supported dimension for visualizations are only
 
 % for 2D case
 if d==2,
+%     axis image
    plot(X(:,1), X(:,2),'r*', Y(:,1), Y(:,2),'bo'); %axis off; axis([-1.5 2 -1.5 2]);
 else
 % for 3D case
@@ -45,6 +46,7 @@ if nargin>2,
     hold on;
     if d==2,
         for i=1:m,
+%             axis image
             plot([X(C(i),1) Y(i,1)],[X(C(i),2) Y(i,2)]);
         end
     else

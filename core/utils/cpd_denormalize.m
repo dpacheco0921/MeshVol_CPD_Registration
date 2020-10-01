@@ -52,10 +52,3 @@ switch lower(Transform.method)
         Transform.W=Transform.W*normal.xscale;   
         Transform.beta=normal.yscale*Transform.beta;       
 end
-
-
-
-
-
-
-

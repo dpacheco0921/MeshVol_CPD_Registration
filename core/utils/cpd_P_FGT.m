@@ -6,12 +6,10 @@ if outliers==0
    outliers=10*eps; 
 end
 
-
 % FGT parameters
 e          = 9;      % Ratio of far field (default e = 10)
 K          = round(min([N M 50+sigma2_init/sigma2])); % Number of centers (default K = sqrt(Nx))
 p          = 6;      % Order of truncation (default p = 8)
-
 
 %[e K p]
 
@@ -33,6 +31,5 @@ for i=1:D
  PX(i,:) = fgt_predict(Y' , xc , A_k , hsigma,e); 
 end
 PX=PX';
-
 
 L=-sum(log(denomP))+D*N*log(sigma2)/2;

@@ -61,6 +61,3 @@ normal.yscale=sqrt(sum(sum(y.^2,2))/m);
 
 X=x/normal.xscale;
 Y=y/normal.yscale;
-
-
-

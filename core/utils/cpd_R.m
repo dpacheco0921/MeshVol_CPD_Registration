@@ -18,8 +18,6 @@ if nargin==3
 
 end
 
-
-
 function R=rot(a)
 
 ca=cos(a);

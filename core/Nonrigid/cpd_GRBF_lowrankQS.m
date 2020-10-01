@@ -24,9 +24,7 @@ e          = 8;      % Ratio of far field (default e = 10)
 K          = round(min([sqrt(M) 100])); % Number of centers (default K = sqrt(Nx))
 p          = 6;      % Order of truncation (default p = 8)
 
-
 [Q,S]=eigs(@grbf,M,numeig,'lm',OPTS);
-
 
     function y=grbf(x,beta) % return y=Gx, without explicitelly constructing G
         [xc , A_k] = fgt_model(Y' , x', hsigma, e,K,p);
