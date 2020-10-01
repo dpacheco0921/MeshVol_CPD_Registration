@@ -1,0 +1,5 @@
+
+demodata/
+*.ffs_db
+*.asv
+*.ffs_lock
