@@ -1,4 +1,4 @@
-# Resgistration of meshes/volumes using CoherentPointDrift-MATLAB
+# Registration of meshes/volumes using CoherentPointDrift-MATLAB
 
 Matlab functions to register meshes and volumes using [Andriy Myronenko](https://sites.google.com/site/myronenko/) [Coherent Point Drift library](https://sites.google.com/site/myronenko/research/cpd) for nonrigid registration.
 
