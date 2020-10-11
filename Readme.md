@@ -1,6 +1,6 @@
-# CoherentPointDrift-MATLAB
+# Resgistration of meshes/volumes using CoherentPointDrift-MATLAB
 
-Personal copy of [Andriy Myronenko](https://sites.google.com/site/myronenko/) [Coherent Point Drift library](https://sites.google.com/site/myronenko/research/cpd) for nonrigid registration.
+Matlab functions to register meshes and volumes using [Andriy Myronenko](https://sites.google.com/site/myronenko/) [Coherent Point Drift library](https://sites.google.com/site/myronenko/research/cpd) for nonrigid registration.
 
 # Usage
 
@@ -10,6 +10,8 @@ To use this package
 
 This code requires additional repositories for mesh processing and visualization:
 - [iso2mesh](https://github.com/fangq/iso2mesh)
+To run batch functions in server:
+- [pu_cluster_interface](https://github.com/dpacheco0921/pu_cluster_interface)
 
 # Citation
 
