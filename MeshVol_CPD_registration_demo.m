@@ -7,7 +7,7 @@ addpath(genpath(pwd))
 % iso2mesh
 
 %% 2) Move to folder and Download demo data
-tDir = strrep(which('MeshVol_CPD_registration_demo_1'), 'MeshVol_CPD_registration_demo.m', '');
+tDir = strrep(which('MeshVol_CPD_registration_demo'), 'MeshVol_CPD_registration_demo.m', '');
 cd(tDir)
 
 url = 'https://www.dropbox.com/s/8imtwt2i7a4er7b/IBNWB_IVIA.zip?dl=1';
