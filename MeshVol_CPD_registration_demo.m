@@ -183,16 +183,20 @@ resample_factor = 1;     % Factor to downsample registration meshes by.
                          % smaller values = faster and typically easier to
                          % register well, but may lose details
 
-iparams.beta = 10;
-iparams.lambda = 1;
-iparams.outliers = 0.2;
+iparams_1to2.beta = 5;
+iparams_1to2.lambda = 1;
+iparams_1to2.outliers = 0.2;
                          
 t0 = stic;
-reg_1to2 = register_meshes(mesh_IVA, mesh_IBNWB, resample_factor, iparams);
+reg_1to2 = register_meshes(mesh_IVA, mesh_IBNWB, resample_factor, iparams_1to2);
 stocf(t0, 'Finished registration 1 -> 2 || IBNWB to nsybIVAi');
 
+iparams_2to1.beta = 5;
+iparams_2to1.lambda = 0.1;
+iparams_2to1.outliers = 0.2;
+
 t0 = stic;
-reg_2to1 = register_meshes(mesh_IBNWB, mesh_IVA, resample_factor, iparams);
+reg_2to1 = register_meshes(mesh_IBNWB, mesh_IVA, resample_factor, iparams_2to1);
 stocf(t0, 'Finished registration 2 -> 1 || nsybIVAi to IBNWB');
 
 % save registrations
@@ -209,23 +213,30 @@ reg_struct.mesh_2 = mesh_IVA;
 reg_struct.mesh_2_roi = mesh_IVA_roi;           % rois to test intersecction
 reg_struct.res2 = res_IVA;
 reg_struct.vol2_sz = siz_IVA;
-reg_struct.beta = iparams.beta;
-reg_struct.lambda = iparams.lambda;
-reg_struct.outliers = iparams.outliers;
+reg_struct.beta = iparams_1to2.beta;
+reg_struct.lambda = iparams_1to2.lambda;
+reg_struct.outliers = iparams_1to2.outliers;
 reg_struct.resamplefactor = resample_factor;
 
-filename = 'reg_1to2_test'; 
+filename = 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1'; 
 save([datadir, filesep, filename, '.mat'], 'reg_struct')
 
 reg_struct.reg_2to1 = reg_2to1;
+reg_struct.beta = iparams_1to2.beta;
+reg_struct.lambda = iparams_1to2.lambda;
+reg_struct.outliers = iparams_1to2.outliers;
 
-filename = 'reg_2to1_test'; 
+filename = 'reg_2to1_lambda_01_beta_5_outliers_02_smp_1'; 
 save([datadir, filesep, filename, '.mat'], 'reg_struct')
 
 % Notes:
 %   for exploring registration parameters see: batch_register_meshes
 
 %% 8) reformat meshes/points or volumes
+
+filename = 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1'; 
+load([datadir, filesep, filename, '.mat'], 'reg_struct')
+
 % 1) reformat central brain surface to IVA
 mesh_IBNWBtoIVA = apply_tform(mesh_IBNWB, reg_1to2);
 
@@ -244,10 +255,18 @@ vizsurfn(mesh_IVA_roi, mesh_roi_IBNWBtoIVA)
 % 1to2: IBNWB->IVA
 % Note: to reformat intensity images, you need the opposite transformation
 
-% 1) generate dform for this registration
-path_reg = [datadir, filesep, 'reg_1to2_test'];
+% 1) generate dform for this registration (this overwrite already saved files)
+path_reg = [datadir, filesep, 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1.mat'];
 dform_1to2 = generate_dform(path_reg);
+save(strrep(path_reg, '.mat', '_dform.mat'), 'deformation_struct', '-v7.3')
 
-% 2) transform image
+path_reg = [datadir, filesep, 'reg_2to1_lambda_01_beta_5_outliers_02_smp_1.mat'];
+dform_2to1 = generate_dform(path_reg);
+save(strrep(path_reg, '.mat', '_dform.mat'), 'deformation_struct', '-v7.3')
+
+% 2)load dform and reformat volumes
+load([datadir, filesep, 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1_dform'])
+
+% 3) transform image
 [IVAim, ~] = nrrdread([datadir, filesep, 'nsybIVAi.nrrd']);
 IVAim_IBNWB = apply_dform(IVAim, dform_1to2, '2to1', 'cubic');
