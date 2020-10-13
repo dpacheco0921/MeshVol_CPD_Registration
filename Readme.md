@@ -4,7 +4,7 @@ Matlab functions to register meshes and volumes using [Andriy Myronenko](https:/
 
 # Usage
 
-To use this package
+See examples in MeshVol_CPD_registration_demo.m on how to go from binary volumes to meshes, edit meshes, and register meshes.
 
 # Dependencies
 
