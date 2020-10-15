@@ -48,13 +48,14 @@ rois = {'bmask_AL', 'bmask_AMMCC_L', 'bmask_AMMCC_R', 'bmask_AOT_L', 'bmask_AOT_
     'bmask_PB', 'bmask_iALT_L', 'bmask_iALT_R', 'bmask_pCCF_L', ...
     'bmask_pCCF_R', 'bmask_sSADc', 'bmask_cbrain', 'bmask_opticlobes_R', 'bmask_opticlobes_L'};
 
-% IBNWB
+% load binary images and save file with meshes
+% IBNWB (saved at 'IBNWB.mat')
 t0 = stic;
 S1 = mesh_matfiles(IBNWB_Path, isoval, reduce_factor, rois);
 save(ff('data', strrep(get_filename(IBNWB_Path)), '_binary', ''), '-struct', 'S1')
 stocf(t0, 'Meshed %s', get_filename(IBNWB_Path))
 
-% nsybIVAi
+% nsybIVAi (saved at 'nsybIVAi.mat')
 t0 = stic;
 S2 = mesh_matfiles(IVA_Path, isoval, reduce_factor, rois);
 save(ff('data', strrep(get_filename(IVA_Path)), '_binary', ''), '-struct', 'S2')
@@ -62,7 +63,7 @@ stocf(t0, 'Meshed %s', get_filename(IVA_Path))
 
 %% 4) load meshes, and define ROIs to use per data
 
-% load both .mat and .nrrd files
+% 4.1) load both .mat and .nrrd files
 datadir = [tDir, filesep, 'demodata', filesep, 'IBNWB_IVIA'];
 
 S_IBNWB = matfile([datadir, filesep, 'IBNWB.mat']);
@@ -86,7 +87,7 @@ use_rois = {'bmask_AL', 'bmask_AMMCC_L', 'bmask_AMMCC_R', 'bmask_AOT_L', 'bmask_
     'bmask_PB', 'bmask_iALT_L', 'bmask_iALT_R', 'bmask_pCCF_L', ...
     'bmask_pCCF_R', 'bmask_sSADc', 'bmask_cbrain', 'bmask_opticlobes_R', 'bmask_opticlobes_L'};
 
-%% 5) Edit meshes to be used for registration and for testing (with optic lobes)
+% 4.2) Edit meshes to be used for registration and for testing (with optic lobes)
 % load meshes 
 stic;
 mesh_IBNWB = cf(@(x)S_IBNWB.(x), use_rois);
@@ -150,7 +151,7 @@ mesh_IVA_rs = mesh_checkrepair_all(mesh_IVA_rs, [1 1 1 1 0]);
 %[cf(@(x) size(x.node, 1), mesh_IBNWB_rs)' cf(@(x) x.type, mesh_IBNWB_rs)']
 %[cf(@(x) size(x.node, 1), mesh_IVA_rs)' cf(@(x) x.type, mesh_IVA_rs)']
 
-%% 6) generate variables to be used for registration
+% 4.3) generate variables to be used for registration
 % merge all rois for registration
 stic;
 mesh_IBNWB = mesh_merge(mesh_IBNWB_rs);
@@ -176,7 +177,7 @@ save([datadir, filesep, 'prepro_meshes_woOL_s.mat'], ...
     'mesh_IBNWB_rs', 'mesh_IVA_rs', ...                 % for accuracy estimation
     'res_IBNWB', 'res_IVA', 'siz_IBNWB', 'siz_IVA')     % general scaling
 
-%% 7) register meshes
+%% 5) register meshes
 load([datadir, filesep, 'prepro_meshes_woOL_s.mat'])
 
 resample_factor = 1;     % Factor to downsample registration meshes by.
@@ -232,7 +233,7 @@ save([datadir, filesep, filename, '.mat'], 'reg_struct')
 % Notes:
 %   for exploring registration parameters see: batch_register_meshes
 
-%% 8) reformat meshes/points or volumes
+%% 6) reformat meshes/points or volumes
 
 filename = 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1'; 
 load([datadir, filesep, filename, '.mat'], 'reg_struct')
@@ -251,7 +252,7 @@ mesh_roi_IBNWBtoIVA = apply_tform(mesh_IBNWB_roi, reg_1to2);
 figure();
 vizsurfn(mesh_IVA_roi, mesh_roi_IBNWBtoIVA)
 
-%% 9) reformat intensity images
+%% 7) reformat intensity images
 % 1to2: IBNWB->IVA
 % Note: to reformat intensity images, you need the opposite transformation
 
@@ -270,3 +271,5 @@ load([datadir, filesep, 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1_dform'])
 % 3) transform image
 [IVAim, ~] = nrrdread([datadir, filesep, 'nsybIVAi.nrrd']);
 IVAim_IBNWB = apply_dform(IVAim, dform_1to2, '2to1', 'cubic');
+
+
