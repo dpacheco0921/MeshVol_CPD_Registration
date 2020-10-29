@@ -19,15 +19,15 @@ function xform = register_meshes(refIm, floatIm, ...
 % default CPD params
 %%%%%%%%%%%%%%%%%%% CPD options (default) %%%%%%%%%%%%%%%%%%%
 cpd_opts = struct();
-cpd_opts.method = 'nonrigid';         % use nonrigid registration with lowrank kernel approximation
-cpd_opts.numeig = 50;                 % leave only 50 larges eigenvectors/values to approximate G
-cpd_opts.eigfgt = 1;                  % use FGT to find the largest eigenvectore/values 
+cpd_opts.method = 'nonrigid';   % use nonrigid registration with lowrank kernel approximation
+cpd_opts.numeig = 50;           % leave only 50 larges eigenvectors/values to approximate G
+cpd_opts.eigfgt = 1;            % use FGT to find the largest eigenvectore/values 
 
 %%%%%%%%%%%%%%%%%%% Tunable %%%%%%%%%%%%%%%%%%%
-cpd_opts.beta = 10;% 20               % strength of interaction between points (width of Gaussian kernel)
-                                      %   -> small: more local deformations, large: more globally translational
-cpd_opts.lambda = 1;% 10              % trade-off between data fitting and smoothness regularization
-cpd_opts.outliers = 0.2;% 0.4         % noise weight
+cpd_opts.beta = 10;% 20         % strength of interaction between points (width of Gaussian kernel)
+                                %   -> small: more local deformations, large: more globally translational
+cpd_opts.lambda = 1;% 10        % trade-off between data fitting and smoothness regularization
+cpd_opts.outliers = 0.2;% 0.4   % The weight of noise and outliers
 
 %%%%%%%%%%%%%%%%%%% Tunable %%%%%%%%%%%%%%%%%%%
 cpd_opts.fgt=2;              % do not use FGT to compute matrix-vector products (2 means to switch to truncated version at the end, see cpd_register)

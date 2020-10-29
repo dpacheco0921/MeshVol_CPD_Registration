@@ -1,4 +1,9 @@
 %% demo
+% 1) add paths
+% 2) Move to folder and Download demo data
+% 3) Generate meshes from binary images (BW images)
+% 4) load meshes, and define ROIs to use per data
+
 %% 1) add paths
 % it assumes you have already add the repository folders to your path
 addpath(genpath(pwd))
@@ -7,7 +12,8 @@ addpath(genpath(pwd))
 % iso2mesh
 
 %% 2) Move to folder and Download demo data
-tDir = strrep(which('MeshVol_CPD_registration_demo'), 'MeshVol_CPD_registration_demo.m', '');
+tDir = strrep(which('MeshVol_CPD_registration_demo'), ...
+    'MeshVol_CPD_registration_demo.m', '');
 cd(tDir)
 
 url = 'https://www.dropbox.com/s/8imtwt2i7a4er7b/IBNWB_IVIA.zip?dl=1';
@@ -192,8 +198,8 @@ t0 = stic;
 reg_1to2 = register_meshes(mesh_IVA, mesh_IBNWB, resample_factor, iparams_1to2);
 stocf(t0, 'Finished registration 1 -> 2 || IBNWB to nsybIVAi');
 
-iparams_2to1.beta = 5;
-iparams_2to1.lambda = 0.1;
+iparams_2to1.beta = 10;
+iparams_2to1.lambda = 1;
 iparams_2to1.outliers = 0.2;
 
 t0 = stic;
@@ -227,7 +233,7 @@ reg_struct.beta = iparams_1to2.beta;
 reg_struct.lambda = iparams_1to2.lambda;
 reg_struct.outliers = iparams_1to2.outliers;
 
-filename = 'reg_2to1_lambda_01_beta_5_outliers_02_smp_1'; 
+filename = 'reg_2to1_lambda_1_beta_10_outliers_02_smp_1'; 
 save([datadir, filesep, filename, '.mat'], 'reg_struct')
 
 % Notes:
@@ -239,20 +245,20 @@ filename = 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1';
 load([datadir, filesep, filename, '.mat'], 'reg_struct')
 
 % 1) reformat central brain surface to IVA
-mesh_IBNWBtoIVA = apply_tform(mesh_IBNWB, reg_1to2);
+mesh_IBNWBtoIVA = apply_tform(mesh_IBNWB, reg_struct.reg_1to2);
 
 % plot surfaces
 figure();
 vizsurfn(mesh_IVA, mesh_IBNWBtoIVA)
 
 % 2) reformat rois surfaces to IVA
-mesh_roi_IBNWBtoIVA = apply_tform(mesh_IBNWB_roi, reg_1to2);
+mesh_roi_IBNWBtoIVA = apply_tform(mesh_IBNWB_roi, reg_struct.reg_1to2);
 
 % plot surfaces
 figure();
 vizsurfn(mesh_IVA_roi, mesh_roi_IBNWBtoIVA)
 
-%% 7) reformat intensity images
+%% 7) reformat intensity images, generate full grid mapping
 % 1to2: IBNWB->IVA
 % Note: to reformat intensity images, you need the opposite transformation
 
@@ -261,15 +267,48 @@ path_reg = [datadir, filesep, 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1.mat'];
 dform_1to2 = generate_dform(path_reg);
 save(strrep(path_reg, '.mat', '_dform.mat'), 'deformation_struct', '-v7.3')
 
-path_reg = [datadir, filesep, 'reg_2to1_lambda_01_beta_5_outliers_02_smp_1.mat'];
+path_reg = [datadir, filesep, 'reg_2to1_lambda_1_beta_10_outliers_02_smp_1.mat'];
 dform_2to1 = generate_dform(path_reg);
 save(strrep(path_reg, '.mat', '_dform.mat'), 'deformation_struct', '-v7.3')
 
-% 2)load dform and reformat volumes
+%% 8) reformat intensity images using 7)
+tDir = strrep(which('MeshVol_CPD_registration_demo'), ...
+    'MeshVol_CPD_registration_demo.m', '');
+cd([tDir, 'demodata', filesep, 'IBNWB_IVIA'])
+datadir = [tDir, filesep, 'demodata', filesep, 'IBNWB_IVIA'];
+
+% 3.1) load images and metadata
+[IVAim, IVAim_meta] = nrrdread([datadir, filesep, 'nsybIVAi.nrrd']);
+[IBNWBim, IBNWB_meta] = nrrdread([datadir, filesep, 'IBNWB.nrrd']);
+
+% 3.2) transform IVA image to IBNWB coordinates
+% load dform and reformat volumes
 load([datadir, filesep, 'reg_1to2_lambda_1_beta_5_outliers_02_smp_1_dform'])
 
-% 3) transform image
-[IVAim, ~] = nrrdread([datadir, filesep, 'nsybIVAi.nrrd']);
-IVAim_IBNWB = apply_dform(IVAim, dform_1to2, '2to1', 'cubic');
+IVAim_IBNWB = apply_dform(single(IVAim), deformation_struct, ...
+    '1to2', 'cubic');
+IVAim_IBNWB(IVAim_IBNWB < 0) = 0;
 
+% save nrrd
+nrrdWriter([pwd, filesep, 'IVAim_IBNWB.nrrd'], ...
+        mat2uint16(IVAim_IBNWB), nrrdread_res(IBNWB_meta), [0 0 0], 'gzip')
 
+% 3.2) transform IBNWB image to IVA coordinates
+% load dform and reformat volumes
+load([datadir, filesep, 'reg_2to1_lambda_1_beta_10_outliers_02_smp_1_dform'])
+IBNWB_IVAim = apply_dform(single(IBNWBim), deformation_struct, ...
+    '2to1', 'cubic');
+IBNWB_IVAim(IBNWB_IVAim < 0) = 0;
+
+% save nrrd
+nrrdWriter([pwd, filesep, 'IBNWB_IVAim.nrrd'], ...
+        mat2uint16(IBNWB_IVAim), nrrdread_res(IVAim_meta), [0 0 0], 'gzip')
+
+% overlay images using FIJI (via StackViewer)
+rIm = 'IBNWB_IVAim.nrrd';
+fIm = 'nsybIVAi.nrrd';
+overlayviewer(fIm, rIm, [], [], pwd, pwd)
+
+rIm = 'IBNWB.nrrd';
+fIm = 'IVAim_IBNWB.nrrd';
+overlayviewer(fIm, rIm, [], [], pwd, pwd)

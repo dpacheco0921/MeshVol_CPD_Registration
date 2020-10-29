@@ -14,6 +14,9 @@ This code requires additional repositories for mesh processing and visualization
 To run batch functions in server:
 - [pu_cluster_interface](https://github.com/dpacheco0921/pu_cluster_interface)
 
+To overlay videos using FIJI:
+- [StackViewer](https://github.com/dpacheco0921/StackViewer)
+
 # Citation
 
 If you use this code please cite the following corresponding paper:
