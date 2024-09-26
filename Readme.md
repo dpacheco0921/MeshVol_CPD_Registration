@@ -17,6 +17,11 @@ To run batch functions in server:
 To overlay videos using FIJI:
 - [StackViewer](https://github.com/dpacheco0921/StackViewer)
 
+To run do demo of transforming skeletons or matrices from FAFB14 to IVIA:
+- [FlyCaImAn](https://github.com/dpacheco0921/FlyCaImAn)
+- See demo_transform_skts_or_xyz_from_fafb14_to_IBWB.R script to transform skeletons/xyz matrices from FAFB14 to IBNWB atlas.
+- See demo_transform_skt_or_xyz_from_IBNWB_to_IVIA.m script to transform skeletons/xyz matrices from IBNWB to IVIA atlas.
+
 # Citation
 
 If you use this code please cite the following corresponding paper:
