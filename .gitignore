@@ -6,3 +6,4 @@ utilities/deprecated
 *.ffs_db
 *.asv
 *.ffs_lock
+*.zip
