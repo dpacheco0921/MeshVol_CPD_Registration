@@ -1,5 +1,6 @@
-
-demodata/
+demodata/IBNWB_IVIA
+demodata/IBNWB/*
+demodata/IVIA/*
 utilities/deprecated
 *.ffs_db
 *.asv
