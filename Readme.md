@@ -11,14 +11,18 @@ See examples in MeshVol_CPD_registration_demo.m on how to go from binary volumes
 This code requires additional repositories for mesh processing and visualization:
 - [iso2mesh](https://github.com/fangq/iso2mesh)
 
-To run batch functions in server:
+To run batch functions in the server:
 - [pu_cluster_interface](https://github.com/dpacheco0921/pu_cluster_interface)
 
 To overlay videos using FIJI:
 - [StackViewer](https://github.com/dpacheco0921/StackViewer)
 
-To run do demo of transforming skeletons or matrices from FAFB14 to IVIA:
+To run a demo on transforming skeletons or matrices from FAFB14 to IVIA:
 - [FlyCaImAn](https://github.com/dpacheco0921/FlyCaImAn)
+
+# Demo for transforming skeletons or matrices from FAFB14 to IVIA
+
+- Download IBNWB <--> IVIA transformations from [IBNWB_IVIA](https://www.dropbox.com/s/qtd9rgv2tfjqgs3/IBNWB_IVIA.zip?st=r3c3kgqq&dl=0)
 - See demo_transform_skts_or_xyz_from_fafb14_to_IBWB.R script to transform skeletons/xyz matrices from FAFB14 to IBNWB atlas.
 - See demo_transform_skt_or_xyz_from_IBNWB_to_IVIA.m script to transform skeletons/xyz matrices from IBNWB to IVIA atlas.
 
