@@ -1,4 +1,5 @@
-# Script to download, skeletonize, register (to IBNWB), and save xyz points (in a matfile) of flywire neurons
+# Script to download, skeletonize, register (to IBNWB), and save xyz points (in a matfile)
+#   of flywire neurons
 
 ###########################################
 # 1) move to working directory
